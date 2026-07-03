@@ -2134,7 +2134,7 @@ describe("CodexAppServerEventProjector", () => {
     });
   });
 
-  it("records promptError when a completed turn has only whitespace assistant text and an orphan tool call", async () => {
+  it("delivers fallback assistant text when a completed turn has only whitespace assistant text and an orphan tool call", async () => {
     const projector = await createProjector(await createParams());
 
     await projector.handleNotification(
@@ -2166,10 +2166,17 @@ describe("CodexAppServerEventProjector", () => {
 
     const result = projector.buildResult(buildEmptyToolTelemetry());
 
-    expect(result.promptError).toContain("without a matching tool.result");
-    expect(result.promptErrorSource).toBe("prompt");
-    expect(result.lastToolError).toBeUndefined();
-    expect(result.assistantTexts).toEqual([]);
+    expect(result.promptError).toBeNull();
+    expect(result.promptErrorSource).toBeNull();
+    expect(result.lastToolError).toMatchObject({
+      toolName: "bash",
+      error: expect.stringContaining("without a matching tool.result"),
+      mutatingAction: true,
+    });
+    expect(result.assistantTexts).toEqual([
+      "I hit a tool-result bookkeeping problem while running the requested tools. The turn did not fail closed; please resend the last instruction and I will continue.",
+    ]);
+    expect(result.lastAssistant).toBeDefined();
   });
 
   it("uses streamed command output when final command snapshots omit aggregated output", async () => {

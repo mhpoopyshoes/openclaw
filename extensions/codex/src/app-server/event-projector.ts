@@ -114,6 +114,8 @@ const MAX_TOOL_OUTPUT_DELTA_MESSAGES_PER_ITEM = 20;
 const TOOL_TRANSCRIPT_OUTPUT_MAX_CHARS = 12_000;
 const MISSING_TOOL_RESULT_ERROR =
   "OpenClaw recorded a native Codex tool.call without a matching tool.result before the turn completed.";
+const MISSING_TOOL_RESULT_FALLBACK_ASSISTANT =
+  "I hit a tool-result bookkeeping problem while running the requested tools. The turn did not fail closed; please resend the last instruction and I will continue.";
 const GENERATED_IMAGE_MEDIA_SUBDIR = "tool-image-generation";
 const BYTES_PER_MB = 1024 * 1024;
 // Match OpenClaw's default image media cap for generated image tool outputs.
@@ -381,13 +383,17 @@ export class CodexAppServerEventProjector {
     const hasAssistantItemText = this.hasAssistantItemTextForSynthesis();
     const legacyFailClosed =
       !this.completedTurn || this.completedTurn.status !== "completed" || hasAssistantItemText;
-    const hasDeliverableAssistantOnCompletedTurn =
-      this.completedTurn?.status === "completed" &&
-      assistantTexts.some((text) => text.trim().length > 0);
     this.synthesizeMissingToolResults({
       synthesize: legacyFailClosed,
-      recordPromptError: legacyFailClosed && !hasDeliverableAssistantOnCompletedTurn,
+      recordPromptError: false,
     });
+    if (
+      assistantTexts.length === 0 &&
+      this.lastNativeToolError &&
+      !this.hasOnlyToolProgressAssistantItemText()
+    ) {
+      assistantTexts.push(MISSING_TOOL_RESULT_FALLBACK_ASSISTANT);
+    }
     const lastAssistant =
       assistantTexts.length > 0
         ? this.createAssistantMessage(assistantTexts.join("\n\n"))
@@ -432,7 +438,6 @@ export class CodexAppServerEventProjector {
     const turnFailed = this.completedTurn?.status === "failed";
     const promptError =
       this.promptError ??
-      this.synthesizedMissingToolResultError ??
       (turnFailed ? (this.completedTurn?.error?.message ?? "codex app-server turn failed") : null);
     const agentHarnessResultClassification = classifyAgentHarnessTerminalOutcome({
       assistantTexts,
@@ -1961,6 +1966,25 @@ export class CodexAppServerEventProjector {
       }
     }
     return false;
+  }
+
+  private hasOnlyToolProgressAssistantItemText(): boolean {
+    let sawAssistantText = false;
+    for (let i = this.assistantItemOrder.length - 1; i >= 0; i -= 1) {
+      const itemId = this.assistantItemOrder[i];
+      if (!itemId || this.assistantPhaseByItem.get(itemId) === "commentary") {
+        continue;
+      }
+      const normalizedText = this.assistantTextByItem.get(itemId)?.trim();
+      if (!normalizedText) {
+        continue;
+      }
+      sawAssistantText = true;
+      if (!this.toolProgressTexts.has(normalizedText)) {
+        return false;
+      }
+    }
+    return sawAssistantText;
   }
 
   private resolveFinalAssistantText(): string | undefined {

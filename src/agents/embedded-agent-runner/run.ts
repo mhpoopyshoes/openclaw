@@ -236,6 +236,7 @@ import {
   resolveEffectiveRuntimeModel,
   resolveHookModelSelection,
 } from "./run/setup.js";
+import { resolveTerminalPayloads } from "./run/terminal-payloads.js";
 import { mergeAttemptToolMediaPayloads } from "./run/tool-media-payloads.js";
 import type { EmbeddedRunFastModeParam } from "./run/types.js";
 import {
@@ -4133,9 +4134,11 @@ async function runEmbeddedAgentInternal(
             : attempt.yieldDetected
               ? "end_turn"
               : (sessionLastAssistant?.stopReason as string | undefined);
-          const terminalPayloads = emptyAssistantReplyIsSilent
-            ? [{ text: SILENT_REPLY_TOKEN }]
-            : payloadsForTerminalPath;
+          const terminalPayloads = resolveTerminalPayloads({
+            assistantTexts: attempt.assistantTexts,
+            emptyAssistantReplyIsSilent,
+            payloadsForTerminalPath,
+          });
           setTerminalLifecycleMeta({
             replayInvalid,
             livenessState,

@@ -3145,10 +3145,14 @@ export async function runCodexAppServerAttempt(
     const effectiveTimedOut = timedOut && !recoveredTurnWatchTimeout;
     const effectiveTurnCompletionIdleTimedOut =
       turnCompletionIdleTimedOut && !recoveredTurnWatchTimeout;
+    const hasFailOpenAssistantText =
+      result.assistantTexts.some((text) => text.trim().length > 0) &&
+      (activeProjector.hasCompletedTerminalAssistantText() || result.lastToolError !== undefined);
     const isFinalAborted = () =>
-      result.aborted ||
       explicitCancellationObserved ||
-      (runAbortController.signal.aborted && !clientClosedAbort && !recoveredTurnWatchTimeout);
+      ((result.aborted ||
+        (runAbortController.signal.aborted && !clientClosedAbort && !recoveredTurnWatchTimeout)) &&
+        !hasFailOpenAssistantText);
     const clientClosedPromptErrorForFinal =
       clientClosedPromptError && hasRecoverableCompletedAssistant
         ? undefined
@@ -3262,12 +3266,13 @@ export async function runCodexAppServerAttempt(
       (completedTurnStatus === "completed" ||
         recoveredTurnWatchTimeout ||
         completedWithoutTerminalNotification);
-    sharedAbortAllowedAfterTerminalOutcome = shouldKeepCodexSharedAbortOpen({
-      trigger: params.trigger,
-      result,
-      attemptSucceeded,
-      explicitCancellationObserved,
-    });
+    sharedAbortAllowedAfterTerminalOutcome =
+      shouldKeepCodexSharedAbortOpen({
+        trigger: params.trigger,
+        result,
+        attemptSucceeded,
+        explicitCancellationObserved,
+      }) || !hasQuiescentCompletedAssistant;
     // Terminal diagnostics, transcript mirroring, hooks, and lifecycle events
     // must all observe one immutable attempt outcome. Failed attempts still
     // allow the shared reply operation to cancel retries or model fallback.

@@ -1065,4 +1065,46 @@ describe("runCodexAppServerAttempt hooks and model diagnostics", () => {
     const [agentEndPayload] = mockCall(agentEnd, "agent_end") as [{ success?: boolean }, unknown];
     expect(agentEndPayload.success).toBe(false);
   });
+
+  it("delivers assistant text from an internally interrupted codex turn", async () => {
+    const agentEnd = vi.fn();
+    initializeGlobalHookRunner(
+      createMockPluginRegistry([{ hookName: "agent_end", handler: agentEnd }]),
+    );
+    const harness = createStartedThreadHarness();
+    const run = runCodexAppServerAttempt(
+      createParams(
+        path.join(tempDir, "interrupted-with-text.jsonl"),
+        path.join(tempDir, "interrupted-with-text-workspace"),
+      ),
+      { pluginConfig: { appServer: { mode: "yolo" } } },
+    );
+
+    await harness.waitForMethod("turn/start");
+    await harness.notify({
+      method: "item/agentMessage/delta",
+      params: {
+        threadId: "thread-1",
+        turnId: "turn-1",
+        itemId: "msg-1",
+        delta: "Recovered final reply.",
+      },
+    });
+    await harness.notify({
+      method: "turn/completed",
+      params: {
+        threadId: "thread-1",
+        turnId: "turn-1",
+        turn: { id: "turn-1", status: "interrupted" },
+      },
+    });
+
+    await expect(run).resolves.toMatchObject({
+      aborted: false,
+      promptError: null,
+      assistantTexts: ["Recovered final reply."],
+    });
+    const [agentEndPayload] = mockCall(agentEnd, "agent_end") as [{ success?: boolean }, unknown];
+    expect(agentEndPayload.success).toBe(true);
+  });
 });
