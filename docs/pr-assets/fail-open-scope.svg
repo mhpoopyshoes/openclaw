@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1220" height="720" viewBox="0 0 1220 720" role="img" aria-labelledby="title desc">
+  <title id="title">OpenClaw Codex fail-open patch scope screenshot</title>
+  <desc id="desc">Terminal-style screenshot describing the OpenClaw patch scope and root cause.</desc>
+  <rect width="1220" height="720" fill="#0f172a"/>
+  <rect x="32" y="32" width="1156" height="656" rx="8" fill="#111827" stroke="#475569"/>
+  <circle cx="64" cy="64" r="8" fill="#ef4444"/>
+  <circle cx="92" cy="64" r="8" fill="#f59e0b"/>
+  <circle cx="120" cy="64" r="8" fill="#22c55e"/>
+  <text x="154" y="70" fill="#d1d5db" font-family="monospace" font-size="18">openclaw patch scope - final response delivery</text>
+  <text x="64" y="124" fill="#93c5fd" font-family="monospace" font-size="18">$ git show --stat --oneline --max-count=1</text>
+  <text x="84" y="164" fill="#e5e7eb" font-family="monospace" font-size="18">e90e44f8 Fail open on empty Codex app-server turns</text>
+  <text x="84" y="206" fill="#e5e7eb" font-family="monospace" font-size="18">7 files changed, 156 insertions(+), 21 deletions(-)</text>
+  <text x="84" y="248" fill="#e5e7eb" font-family="monospace" font-size="18">create mode src/agents/embedded-agent-runner/run/terminal-payloads.ts</text>
+  <text x="84" y="290" fill="#e5e7eb" font-family="monospace" font-size="18">create mode src/agents/embedded-agent-runner/run/terminal-payloads.test.ts</text>
+  <text x="64" y="360" fill="#fbbf24" font-family="monospace" font-size="18">Root cause</text>
+  <text x="84" y="402" fill="#e5e7eb" font-family="monospace" font-size="18">Codex could build assistantTexts after a recoverable interrupted turn,</text>
+  <text x="84" y="438" fill="#e5e7eb" font-family="monospace" font-size="18">but the embedded runner only delivered richer terminal payloads.</text>
+  <text x="64" y="508" fill="#fbbf24" font-family="monospace" font-size="18">Fix</text>
+  <text x="84" y="550" fill="#e5e7eb" font-family="monospace" font-size="18">Fall open for missing native tool results and internally interrupted</text>
+  <text x="84" y="586" fill="#e5e7eb" font-family="monospace" font-size="18">turns with real assistant text, while preserving empty-turn classification.</text>
+</svg>

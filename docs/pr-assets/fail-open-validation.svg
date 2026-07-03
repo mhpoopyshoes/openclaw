@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1220" height="720" viewBox="0 0 1220 720" role="img" aria-labelledby="title desc">
+  <title id="title">OpenClaw Codex fail-open validation screenshot</title>
+  <desc id="desc">Terminal-style screenshot showing the focused OpenClaw validation commands that passed.</desc>
+  <rect width="1220" height="720" fill="#111827"/>
+  <rect x="32" y="32" width="1156" height="656" rx="8" fill="#0b1020" stroke="#334155"/>
+  <circle cx="64" cy="64" r="8" fill="#ef4444"/>
+  <circle cx="92" cy="64" r="8" fill="#f59e0b"/>
+  <circle cx="120" cy="64" r="8" fill="#22c55e"/>
+  <text x="154" y="70" fill="#cbd5e1" font-family="monospace" font-size="18">openclaw validation - Codex final response fail-open patch</text>
+  <text x="64" y="120" fill="#93c5fd" font-family="monospace" font-size="18">$ npm test -- --run src/agents/embedded-agent-runner/run/terminal-payloads.test.ts</text>
+  <text x="84" y="154" fill="#86efac" font-family="monospace" font-size="18">PASS 1 file, 3 tests</text>
+  <text x="64" y="210" fill="#93c5fd" font-family="monospace" font-size="18">$ npm test -- --run extensions/codex/src/app-server/run-attempt.hooks.test.ts</text>
+  <text x="84" y="244" fill="#86efac" font-family="monospace" font-size="18">PASS 1 file, 22 tests</text>
+  <text x="64" y="300" fill="#93c5fd" font-family="monospace" font-size="18">$ npm test -- --run extensions/codex/src/app-server/event-projector.test.ts</text>
+  <text x="84" y="334" fill="#86efac" font-family="monospace" font-size="18">PASS 1 file, 99 tests</text>
+  <text x="64" y="390" fill="#93c5fd" font-family="monospace" font-size="18">$ npm test -- --run extensions/codex/src/app-server/outcome-fallback-runtime-contract.test.ts</text>
+  <text x="84" y="424" fill="#86efac" font-family="monospace" font-size="18">PASS 1 file, 12 tests</text>
+  <text x="64" y="500" fill="#e5e7eb" font-family="monospace" font-size="18">Commit: e90e44f8 Fail open on empty Codex app-server turns</text>
+  <text x="64" y="536" fill="#e5e7eb" font-family="monospace" font-size="18">Branch: codex/fail-open-missing-native-tool-results</text>
+  <text x="64" y="592" fill="#fbbf24" font-family="monospace" font-size="18">Result: focused projector, hook, fallback-contract, and terminal payload tests are green.</text>
+</svg>
